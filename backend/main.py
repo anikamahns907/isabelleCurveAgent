@@ -1,15 +1,12 @@
 from fastapi import FastAPI
 from backend.routers.ask import router as ask_router
+from backend.routers.articleanalysis import router as article_router
 
-app = FastAPI(
-    title="Biostats Tutor Backend",
-    description="Backend for general chat and article analysis modes",
-    version="0.1.0"
-)
+app = FastAPI(title="Biostats Tutor Backend", version="1.0.0")
 
-# Register endpoints
-app.include_router(ask_router, prefix="/ask", tags=["General Chat API"])
+app.include_router(ask_router)
+app.include_router(article_router)
 
 @app.get("/")
-async def root():
-    return {"message": "Backend is running. Use /ask/chat to interact."}
+def root():
+    return {"message": "Backend running"}
