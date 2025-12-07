@@ -1,4 +1,6 @@
 from pydantic import BaseModel
+from typing import Optional
+
 
 class ArticleAnalysisRequest(BaseModel):
     student_answer: str
@@ -12,4 +14,4 @@ class ArticleAnalysisInitResponse(BaseModel):
 class ArticleAnalysisFollowupResponse(BaseModel):
     reflection: str
     clarification: str
-    followup_question: str
+    followup_question: Optional[str]

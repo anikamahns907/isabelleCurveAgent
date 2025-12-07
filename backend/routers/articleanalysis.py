@@ -111,3 +111,37 @@ async def continue_analysis(req: ContinueRequest):
     }).execute()
 
     return ai_output
+
+# ============================================================
+# 3) EXPORT CONVERSATION
+# ============================================================
+@router.get("/export/{conversation_id}")
+async def export_conversation(conversation_id: str):
+    """
+    Returns the entire conversation (AI + student messages)
+    in chronological order so the front end can render/export it.
+    """
+    from backend.core.supabase_client import supabase
+
+    # Load turns
+    history = supabase.table("conversation_turns") \
+        .select("*") \
+        .eq("conversation_id", conversation_id) \
+        .order("created_at", desc=False) \
+        .execute()
+
+    turns = history.data
+
+    # Format export transcript
+    transcript = []
+    for turn in turns:
+        transcript.append({
+            "timestamp": turn["created_at"],
+            "role": turn["role"],
+            "content": turn["content"]
+        })
+
+    return {
+        "conversation_id": conversation_id,
+        "transcript": transcript
+    }

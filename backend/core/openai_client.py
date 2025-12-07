@@ -63,8 +63,13 @@ Return STRICT JSON:
 {
   "reflection": "...",
   "clarification": "...",
-  "followup_question": "..."
+  "followup_question": "..."   // OR null if the session should end
 }
+
+If the student expresses that they are finished, want to wrap up, or request a summary,
+then output a final message and set "followup_question" to null.
+Do NOT ask additional questions after that.
+
 """
 
 
