@@ -1,10 +1,10 @@
 from openai import AsyncOpenAI
 from backend.core.config import settings
+from backend.core.rag import search_similar   # NEW (RAG integration)
 
 client = AsyncOpenAI(api_key=settings.OPENAI_API_KEY)
 
 import json
-
 
 # ============================================================
 # SYSTEM PROMPTS
@@ -13,6 +13,15 @@ GENERAL_CHAT_SYSTEM_PROMPT = """
 You are a helpful biostatistics tutor.
 You explain probability, inference, regression, ANOVA, sampling distributions,
 and general statistical concepts in clear, intuitive language.
+
+You have access to retrieved course materials that may contain:
+- textbook excerpts
+- homework solutions
+- exam guides
+- lecture PDFs
+- handouts
+These appear under the heading 'Relevant course materials'.
+Use them only to guide your explanation accurately.
 """
 
 
@@ -35,7 +44,7 @@ Your job is to help the student:
 - Interpret specific statistical outputs
 
 You must NEVER give direct answers.
-Always ask ONE question at a time based on the student’s previous response.
+Always ask ONE question at a time based on the student's previous response.
 
 ===========================
 STRICT BEHAVIOR RULES
@@ -43,7 +52,7 @@ STRICT BEHAVIOR RULES
 1. NEVER answer your own questions.
 2. NEVER invent results from the article.
 3. Treat ANY non-empty student answer as legitimate.
-4. NEVER say “the student did not respond.”
+4. NEVER say "the student did not respond."
 5. ALWAYS produce:
    - Reflection
    - Advice/Suggestion
@@ -69,18 +78,26 @@ Return STRICT JSON:
 If the student expresses that they are finished, want to wrap up, or request a summary,
 then output a final message and set "followup_question" to null.
 Do NOT ask additional questions after that.
-
 """
 
 
 # ============================================================
-# GENERAL CHAT
+# GENERAL CHAT (Now RAG-powered)
 # ============================================================
 async def openai_chat(user_message: str) -> str:
+    """
+    General chat now retrieves relevant course materials.
+    """
+
+    # 🔍 RAG: retrieve 5 most relevant course chunks
+    docs = await search_similar(user_message)
+    context = "\n\n".join([d["content"] for d in docs]) if docs else "No relevant course materials retrieved."
+
     response = await client.chat.completions.create(
         model="gpt-4o-mini",
         messages=[
             {"role": "system", "content": GENERAL_CHAT_SYSTEM_PROMPT},
+            {"role": "system", "content": f"Relevant course materials:\n{context}"},
             {"role": "user", "content": user_message},
         ],
         max_tokens=400
@@ -90,7 +107,7 @@ async def openai_chat(user_message: str) -> str:
 
 
 # ============================================================
-# START ARTICLE ANALYSIS
+# START ARTICLE ANALYSIS (no RAG needed here)
 # ============================================================
 async def start_article_analysis(article_text: str) -> str:
     truncated = article_text[:8000]
@@ -121,22 +138,24 @@ Return ONLY:
 
 
 # ============================================================
-# CONTINUE ARTICLE ANALYSIS (Memory-aware)
+# CONTINUE ARTICLE ANALYSIS (Now RAG + memory)
 # ============================================================
 async def continue_article_analysis(student_answer: str, previous_messages: list) -> dict:
     """
-    Takes:
-      - full previous message history (already role-mapped)
-      - new student answer
-    Returns:
-      JSON dict with reflection, clarification, followup_question
+    Memory-aware continuation + uses RAG to pull relevant course material.
     """
 
-    # Build message list with SYSTEM prompt at the top
-    messages = [{"role": "system", "content": ARTICLE_ANALYSIS_SYSTEM_PROMPT}]
-    messages += previous_messages
+    # 🔍 RAG search based on student's answer
+    docs = await search_similar(student_answer)
+    course_context = "\n\n".join([d["content"] for d in docs]) if docs else "No relevant course materials retrieved."
 
-    # Add the new student message
+    # Build message list
+    messages = [
+        {"role": "system", "content": ARTICLE_ANALYSIS_SYSTEM_PROMPT},
+        {"role": "system", "content": f"Relevant course materials:\n{course_context}"}
+    ]
+
+    messages += previous_messages
     messages.append({"role": "user", "content": student_answer})
 
     # JSON formatting request
@@ -152,9 +171,9 @@ Respond ONLY as strict JSON:
   "followup_question": "..."
 }}
 """
-
     messages.append({"role": "user", "content": formatting_prompt})
 
+    # Make LLM call
     response = await client.chat.completions.create(
         model="gpt-4o",
         messages=messages,
