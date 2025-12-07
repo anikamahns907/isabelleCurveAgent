@@ -1,0 +1,30 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environment
+venv/
+.venv/
+
+# Environment variables / secrets
+.env
+.env.*
+
+# macOS system files
+.DS_Store
+
+# Logs
+*.log
+
+# VSCode settings
+.vscode/
+.vscode/*
+
+# Uvicorn reload cache
+*.db
+
+# Byte-compiled
+*.py[cod]
+*$py.class
