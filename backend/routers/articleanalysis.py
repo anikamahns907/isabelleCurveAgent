@@ -61,8 +61,17 @@ async def start_analysis(file: UploadFile = File(...)):
 # ============================================================
 # 2) CONTINUE ARTICLE ANALYSIS (Memory-aware)
 # ============================================================
+from pydantic import BaseModel
+
+class ContinueRequest(BaseModel):
+    conversation_id: str
+    student_answer: str
+
 @router.post("/continue")
-async def continue_analysis(conversation_id: str, student_answer: str):
+async def continue_analysis(req: ContinueRequest):
+    conversation_id = req.conversation_id
+    student_answer = req.student_answer
+
     from backend.core.supabase_client import supabase
     import json
 
