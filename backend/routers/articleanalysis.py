@@ -4,11 +4,13 @@ from backend.core.openai_client import (
     start_article_analysis,
     continue_article_analysis,
 )
+import json
 from backend.models.article_models import (
     ArticleAnalysisRequest,
     ArticleAnalysisInitResponse,
     ArticleAnalysisFollowupResponse,
 )
+
 
 router = APIRouter(prefix="/articleanalysis", tags=["Article Analysis"])
 
@@ -16,41 +18,87 @@ router = APIRouter(prefix="/articleanalysis", tags=["Article Analysis"])
 # ============================================================
 # 1) START ARTICLE ANALYSIS — User uploads PDF
 # ============================================================
-@router.post("/start", response_model=ArticleAnalysisInitResponse)
+@router.post("/start")
 async def start_analysis(file: UploadFile = File(...)):
-    # Ensure PDF
+    from backend.core.supabase_client import supabase
+
     if file.content_type != "application/pdf":
         raise HTTPException(status_code=400, detail="File must be a PDF.")
 
-    # Read bytes and extract/clean PDF text
     pdf_bytes = await file.read()
     text = extract_text_from_pdf(pdf_bytes)
 
-    # Ask OpenAI for the first question
+    # 1. Store the article text
+    article = supabase.table("articles").insert({
+        "pdf_text": text
+    }).execute()
+    article_id = article.data[0]["id"]
+
+    # 2. Create a new conversation session
+    conversation = supabase.table("conversations").insert({
+        "article_id": article_id
+    }).execute()
+    conversation_id = conversation.data[0]["id"]
+
+    # 3. Generate first AI question
     first_question = await start_article_analysis(text)
 
-    return ArticleAnalysisInitResponse(
-        message="PDF processed successfully.",
-        next_question=first_question,
-    )
+    # 4. Save the AI message
+    supabase.table("conversation_turns").insert({
+        "conversation_id": conversation_id,
+        "role": "ai",
+        "content": first_question
+    }).execute()
+
+    return {
+        "conversation_id": conversation_id,
+        "message": "PDF processed successfully.",
+        "next_question": first_question
+    }
+
 
 
 # ============================================================
-# 2) CONTINUE ARTICLE ANALYSIS — Student answers questions
+# 2) CONTINUE ARTICLE ANALYSIS (Memory-aware)
 # ============================================================
-@router.post("/continue", response_model=ArticleAnalysisFollowupResponse)
-async def continue_analysis(request: ArticleAnalysisRequest):
-    if not request.student_answer or request.student_answer.strip() == "":
-        raise HTTPException(
-            status_code=400,
-            detail="Student answer cannot be empty."
-        )
+@router.post("/continue")
+async def continue_analysis(conversation_id: str, student_answer: str):
+    from backend.core.supabase_client import supabase
+    import json
 
-    # Ask OpenAI to reflect + clarify + ask follow-up
-    result = await continue_article_analysis(request.student_answer)
+    # 1. Save student turn
+    supabase.table("conversation_turns").insert({
+        "conversation_id": conversation_id,
+        "role": "student",
+        "content": student_answer
+    }).execute()
 
-    return ArticleAnalysisFollowupResponse(
-        reflection=result["reflection"],
-        clarification=result["clarification"],
-        followup_question=result["followup_question"],
+    # 2. Load history
+    history = supabase.table("conversation_turns") \
+        .select("*") \
+        .eq("conversation_id", conversation_id) \
+        .order("created_at", desc=False) \
+        .execute()
+
+    turns = history.data
+
+    # 3. Convert to OpenAI roles
+    previous_messages = []
+    for turn in turns:
+        role = "user" if turn["role"] == "student" else "assistant"
+        previous_messages.append({"role": role, "content": turn["content"]})
+
+    # 4. Generate AI response (reflection, advice, question)
+    ai_output = await continue_article_analysis(
+        student_answer=student_answer,
+        previous_messages=previous_messages
     )
+
+    # 5. Store AI turn in DB as JSON text
+    supabase.table("conversation_turns").insert({
+        "conversation_id": conversation_id,
+        "role": "ai",
+        "content": json.dumps(ai_output)
+    }).execute()
+
+    return ai_output
