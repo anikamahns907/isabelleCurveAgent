@@ -50,10 +50,10 @@ Strict answer-handling rules:
    - Ask ONE follow-up question that deepens understanding.
 
 Output rules:
-For the “start” prompt: produce only a short welcome message + first question.
-For the “continue” prompt: produce ONLY:
+For the "start" prompt: produce only a short welcome message + first question.
+For the "continue" prompt: produce ONLY:
 1. Reflection section
-2. Clarification/Correction (if needed)
+2. Advice/Suggestion (if needed)
 3. ONE follow-up question
 """
 
@@ -96,7 +96,7 @@ async def continue_article_analysis(student_answer: str) -> dict:
     """
     After the student answers a question, generate:
     - reflection
-    - clarification (if needed)
+    - advice/suggestion (if needed)
     - follow-up question
     
     The model is required to return EXACT JSON so parsing is reliable.
@@ -109,7 +109,7 @@ The student answered:
 
 Now respond in STRICT JSON with exactly these keys:
 - "reflection": summarize the student's reasoning.
-- "clarification": correct misunderstandings or refine their interpretation.
+- "clarification": provide advice/suggestions to correct misunderstandings or refine their interpretation.
 - "followup_question": ask ONE next question that deepens analysis.
 
 Your ENTIRE reply must be VALID JSON. DO NOT add explanation, commentary,
