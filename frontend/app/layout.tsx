@@ -14,8 +14,11 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Biostats Tutor",
-  description: "AI-powered biostatistics tutoring assistant",
+  title: "Isabelle Curve",
+  description: "AI-powered biostatistics peer assistant",
+  icons: {
+    icon: "/logo.png",
+  },
 };
 
 export default function RootLayout({

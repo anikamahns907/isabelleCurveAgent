@@ -2,7 +2,7 @@
 
 :root {
   --isabelle-primary: #0d4784;
-  --isabelle-accent: #99c5ff;
+  --isabelle-accent: #4e688a;
   --isabelle-bg: #f5f8fc;
   --isabelle-chat-bg: #ffffff;
   --isabelle-text: #0d1a2a;
@@ -10,6 +10,8 @@
   --background: var(--isabelle-bg);
   --foreground: var(--isabelle-text);
 }
+
+
 
 @theme inline {
   --color-primary: var(--isabelle-primary);
@@ -26,4 +28,46 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans);
+}
+
+
+@keyframes curveFloat {
+  0% {
+    transform: translateX(-40px) translateY(0);
+    opacity: 0.18;
+  }
+  50% {
+    transform: translateX(40px) translateY(-10px);
+    opacity: 0.28;
+  }
+  100% {
+    transform: translateX(-40px) translateY(0);
+    opacity: 0.18;
+  }
+}
+
+@keyframes curveFloatSlow {
+  0% {
+    transform: translateX(50px) translateY(5px);
+    opacity: 0.10;
+  }
+  50% {
+    transform: translateX(-50px) translateY(0);
+    opacity: 0.20;
+  }
+  100% {
+    transform: translateX(50px) translateY(5px);
+    opacity: 0.10;
+  }
+}
+
+.animate-curveFloat {
+  animation: curveFloat 12s ease-in-out infinite;
+}
+
+.animate-curveFloatSlow {
+  animation: curveFloatSlow 20s ease-in-out infinite;
+}
+:root {
+  --isabelle-bg: rgba(255, 255, 255, 0.85); /* instead of solid #eef2f7 */
 }
