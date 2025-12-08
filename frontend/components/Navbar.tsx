@@ -4,11 +4,14 @@ import Link from "next/link";
 export default function Navbar() {
   return (
     <nav className="border-b border-gray-200 bg-white/80 backdrop-blur-lg">
-      <div className="mx-auto max-w-4xl px-3 sm:px-4 lg:px-6">
+      <div className="mx-auto w-full px-6 sm:px-8 lg:px-10">
         <div className="flex h-16 items-center justify-between">
 
           {/* Logo + Title */}
-          <div className="flex items-center gap-3">
+          <Link
+            href="/"
+            className="flex items-center gap-3 hover:opacity-80 transition"
+          >
             <Image
               src="/logo.png"
               alt="Isabelle Curve Logo"
@@ -16,13 +19,10 @@ export default function Navbar() {
               height={36}
               className="rounded-md"
             />
-            <Link
-              href="/"
-              className="text-lg font-semibold text-[var(--isabelle-primary)] hover:text-blue-700 transition"
-            >
+            <span className="text-lg font-semibold text-[var(--isabelle-primary)]">
               Isabelle Curve
-            </Link>
-          </div>
+            </span>
+          </Link>
 
           {/* Navigation */}
           <div className="flex items-center gap-8 text-sm">
