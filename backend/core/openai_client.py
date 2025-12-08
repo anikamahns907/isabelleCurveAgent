@@ -235,21 +235,14 @@ async def continue_article_analysis(student_answer: str, previous_messages: list
 
     \"\"\"{student_answer}\"\"\"
 
-    When creating the JSON output, apply these rules:
-
-    1. Never ask two questions at once.
-    2. If your clarification already contains a question mark '?', then "followup_question" MUST be an empty string.
-    3. If your clarification does NOT contain a question, then "followup_question" MUST contain exactly one short question.
-    4. Do not repeat a question across fields.
-
-    Return ONLY valid JSON in the format:
-
-    {
+    Respond ONLY as strict JSON:
+    {{
     "reflection": "...",
     "clarification": "...",
     "followup_question": "..."
-    }
+    }}
     """
+
 
     messages.append({"role": "user", "content": formatting_prompt})
 

@@ -150,9 +150,38 @@ export default function AnalysisPage() {
                   Article Analysis
                 </h1>
                 <p className="text-gray-600">
-                  Upload a PDF article to start a guided Q&A session
+                  Upload a PDF article to start a guided assessment session with Isabelle
                 </p>
               </div>
+              <div className="space-y-4 text-center">
+              <h2 className="text-lg font-semibold text-gray-900">
+                Choose an Article to Analyze
+              </h2>
+              <p className="text-sm text-gray-700">
+                Before starting the guided analysis, please choose a biostatistics-related
+                research article you want to explore.
+                Try searching through{" "}
+                <a
+                  href="https://bruknow.library.brown.edu/discovery/search?query=any,contains,biostatisc&tab=Everything&search_scope=MyInst_and_CI&vid=01BU_INST:BROWN&offset=0"
+                  target="_blank"
+                  className="text-[var(--isabelle-primary)] underline hover:text-blue-700"
+                >
+                  Brown Library Search (BruKnow)
+                </a>{" "}
+                or journals like{" "}
+                <a
+                  href="https://www.nature.com"
+                  target="_blank"
+                  className="text-[var(--isabelle-primary)] underline hover:text-blue-700"
+                >
+                  Nature
+                </a>.
+              </p>
+              <p className="text-xs text-gray-500">
+                Once you have your article, upload the PDF below to begin.
+              </p>
+            </div>
+
               <PdfUploadBox onUpload={handlePdfUpload} disabled={isUploading} />
               {isUploading && (
                 <div className="text-center text-sm text-gray-500">
