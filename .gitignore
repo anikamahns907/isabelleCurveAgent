@@ -31,3 +31,6 @@ venv/
 
 backend/.env
 *.env
+
+
+/node_modules
