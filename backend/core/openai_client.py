@@ -125,7 +125,7 @@ Return ONLY:
 """
 
     response = await client.chat.completions.create(
-        model="4o",
+        model="gpt-4o-mini",
         messages=[
             {"role": "system", "content": ARTICLE_ANALYSIS_SYSTEM_PROMPT},
             {"role": "user", "content": prompt},
@@ -175,7 +175,7 @@ Respond ONLY as strict JSON:
 
     # Make LLM call
     response = await client.chat.completions.create(
-        model="gpt-4o",
+        model="gpt-4o-mini",
         messages=messages,
         max_tokens=500,
         response_format={"type": "json_object"},
