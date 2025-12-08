@@ -46,7 +46,7 @@ export default function ChatInput({
   };
 
   return (
-    <div className="border-t border-gray-200 bg-white p-4">
+    <div className="fixed bottom-0 left-0 right-0 border-t border-gray-200 bg-white p-3 z-10">
       <div className="mx-auto max-w-4xl">
         <div className="flex items-end gap-3 rounded-2xl border border-gray-200 bg-white p-3 shadow-sm focus-within:border-gray-300 focus-within:shadow-md transition-all">
 

@@ -12,7 +12,7 @@ from backend.models.article_models import (
 )
 
 
-router = APIRouter(prefix="/articleanalysis", tags=["Article Analysis"])
+router = APIRouter(prefix="/articleanalysis", tags=["Start Article Discussion "])
 
 
 # ============================================================

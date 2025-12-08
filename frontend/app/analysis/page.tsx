@@ -175,7 +175,7 @@ const handlePdfUpload = async (file: File) => {
       // Minimal header
       doc.setFontSize(14);
       doc.setFont("helvetica", "bold");
-      doc.text("Article Analysis", margin, yPosition);
+      doc.text("Start Article Discussion", margin, yPosition);
       yPosition += lineHeight * 1.2;
       
       // Article title
@@ -287,13 +287,13 @@ const handlePdfUpload = async (file: File) => {
 
   return (
     <div className="flex h-screen flex-col bg-white">
-      <div className="flex-1 overflow-y-auto">
+      <div className="flex-1 overflow-y-auto pb-24">
         <div className="mx-auto max-w-4xl px-3 py-8 sm:px-4 lg:px-6">
           {!conversationId ? (
             <div className="space-y-6">
               <div className="text-center">
                 <h1 className="mb-2 text-2xl font-semibold text-gray-900">
-                  Article Analysis
+                  Start Article Discussion
                 </h1>
                 <p className="text-gray-600">
                   Upload a PDF article to start a guided assessment session with Isabelle

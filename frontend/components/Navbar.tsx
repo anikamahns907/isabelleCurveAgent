@@ -25,12 +25,15 @@ export default function Navbar() {
           </div>
 
           {/* Navigation */}
-          <div className="flex items-center gap-6 text-sm">
+          <div className="flex items-center gap-8 text-sm">
             <Link href="/chat" className="text-gray-700 hover:text-[var(--isabelle-primary)]">
               Chat
             </Link>
             <Link href="/analysis" className="text-gray-700 hover:text-[var(--isabelle-primary)]">
-              Article Analysis
+              Start Article Discussion
+            </Link>
+            <Link href="/resources" className="text-gray-700 hover:text-[var(--isabelle-primary)]">
+              Resources
             </Link>
           </div>
         </div>

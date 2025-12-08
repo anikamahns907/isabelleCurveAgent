@@ -55,7 +55,7 @@ export default function Home() {
             onClick={() => setShowModal(true)}
             className="rounded-xl border-2 border-[var(--isabelle-primary)] px-7 py-3 font-medium text-[var(--isabelle-primary)] hover:bg-[var(--isabelle-accent)]/20 transition"
           >
-            Analyze Article
+            Start Article Discussion
           </button>
         </div>
       </main>
