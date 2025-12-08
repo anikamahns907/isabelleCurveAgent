@@ -91,11 +91,26 @@ async def continue_analysis(req: ContinueRequest):
 
     turns = history.data
 
-    # 3. Convert to OpenAI roles
+    # 3. Convert to OpenAI roles AND flatten JSON AI messages
     previous_messages = []
     for turn in turns:
         role = "user" if turn["role"] == "student" else "assistant"
-        previous_messages.append({"role": role, "content": turn["content"]})
+        content = turn["content"]
+
+        # If AI message is stored as JSON string, flatten into readable text
+        try:
+            parsed = json.loads(content)
+            # Flatten into a single assistant message
+            content = (
+                f"Reflection: {parsed.get('reflection','')}\n"
+                f"Clarification: {parsed.get('clarification','')}\n"
+                f"Follow-up Question: {parsed.get('followup_question','')}"
+            )
+        except Exception:
+            pass  # leave content unchanged if not JSON
+
+        previous_messages.append({"role": role, "content": content})
+
 
     # 4. Generate AI response (reflection, advice, question)
     ai_output = await continue_article_analysis(

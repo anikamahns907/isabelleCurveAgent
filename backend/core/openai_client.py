@@ -72,12 +72,20 @@ Return STRICT JSON:
 {
   "reflection": "...",
   "clarification": "...",
-  "followup_question": "..."   // OR null if the session should end
+  "followup_question": "..."
 }
 
-If the student expresses that they are finished, want to wrap up, or request a summary,
-then output a final message and set "followup_question" to null.
-Do NOT ask additional questions after that.
+===========================
+FOLLOW-UP CONTINUITY RULE
+===========================
+You must ALWAYS generate a follow-up question unless:
+- the student explicitly says they are done,
+- asks for a summary,
+- or asks to end the session.
+
+Do NOT set followup_question to null unless the student clearly ends the session.
+Otherwise, continue the guided-question cycle with exactly ONE new question.
+
 """
 
 
