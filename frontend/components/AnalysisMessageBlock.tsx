@@ -12,55 +12,37 @@ export default function AnalysisMessageBlock({
   followupQuestion,
 }: AnalysisMessageBlockProps) {
   return (
-    <div className="space-y-4 rounded-2xl bg-gray-50 p-5">
+    <div className="space-y-4 rounded-2xl bg-white border border-[var(--isabelle-accent)] p-5 shadow-sm">
+
       <div>
-        <h3 className="mb-2 text-sm font-semibold text-gray-700">
+        <h3 className="mb-2 text-sm font-semibold text-[var(--isabelle-primary)]">
           Reflection
         </h3>
         <div className="text-sm text-gray-900">
-          <ReactMarkdown
-            components={{
-              p: ({ children }) => <p className="mb-2 last:mb-0">{children}</p>,
-            }}
-          >
-            {reflection}
-          </ReactMarkdown>
+          <ReactMarkdown>{reflection}</ReactMarkdown>
         </div>
       </div>
 
       <div>
-        <h3 className="mb-2 text-sm font-semibold text-gray-700">
+        <h3 className="mb-2 text-sm font-semibold text-[var(--isabelle-primary)]">
           Clarification
         </h3>
         <div className="text-sm text-gray-900">
-          <ReactMarkdown
-            components={{
-              p: ({ children }) => <p className="mb-2 last:mb-0">{children}</p>,
-            }}
-          >
-            {clarification}
-          </ReactMarkdown>
+          <ReactMarkdown>{clarification}</ReactMarkdown>
         </div>
       </div>
 
       {followupQuestion && (
         <div>
-          <h3 className="mb-2 text-sm font-semibold text-gray-700">
+          <h3 className="mb-2 text-sm font-semibold text-[var(--isabelle-primary)]">
             Follow-up Question
           </h3>
           <div className="text-sm text-gray-900">
-            <ReactMarkdown
-              components={{
-                p: ({ children }) => (
-                  <p className="mb-2 last:mb-0">{children}</p>
-                ),
-              }}
-            >
-              {followupQuestion}
-            </ReactMarkdown>
+            <ReactMarkdown>{followupQuestion}</ReactMarkdown>
           </div>
         </div>
       )}
+
     </div>
   );
 }

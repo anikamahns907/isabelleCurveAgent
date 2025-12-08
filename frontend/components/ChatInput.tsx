@@ -49,6 +49,7 @@ export default function ChatInput({
     <div className="border-t border-gray-200 bg-white p-4">
       <div className="mx-auto max-w-4xl">
         <div className="flex items-end gap-3 rounded-2xl border border-gray-200 bg-white p-3 shadow-sm focus-within:border-gray-300 focus-within:shadow-md transition-all">
+
           <textarea
             ref={textareaRef}
             value={message}
@@ -57,16 +58,17 @@ export default function ChatInput({
             disabled={disabled}
             placeholder={placeholder}
             rows={1}
-            className="flex-1 resize-none border-0 bg-transparent text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-0 disabled:cursor-not-allowed disabled:opacity-50 overflow-y-auto"
+            className="flex-1 resize-none border-0 bg-transparent text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 overflow-y-auto"
             style={{
               maxHeight: "200px",
               minHeight: "24px",
             }}
           />
+
           <button
             onClick={handleSend}
             disabled={disabled || !message.trim()}
-            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gray-900 text-white transition-colors hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-gray-900"
+            className="flex h-8 w-8 items-center justify-center rounded-lg bg-[var(--isabelle-primary)] text-white transition hover:bg-blue-900 disabled:opacity-50 disabled:hover:bg-[var(--isabelle-primary)]"
             aria-label="Send message"
           >
             <svg
@@ -83,6 +85,7 @@ export default function ChatInput({
               <path d="M22 2 11 13" />
             </svg>
           </button>
+
         </div>
       </div>
     </div>
