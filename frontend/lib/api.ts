@@ -5,10 +5,19 @@ export interface ChatResponse {
 }
 
 export interface ArticleAnalysisStartResponse {
-  conversation_id: string;
+  conversation_id: string | null;
   message: string;
-  next_question: string;
+  next_question: string | null;
+  is_valid: boolean;
+  article_title?: string;
+  suggestions?: {
+    bruKnow: string;
+    pubmed: string;
+    nature: string;
+    sciencedirect: string;
+  };
 }
+
 
 export interface ArticleAnalysisContinueResponse {
   reflection: string;
@@ -24,6 +33,8 @@ export interface TranscriptEntry {
 
 export interface ExportResponse {
   conversation_id: string;
+  article_id?: string | null;
+  article_title?: string;
   transcript: TranscriptEntry[];
 }
 

@@ -1,5 +1,5 @@
 from fastapi import APIRouter, UploadFile, File, HTTPException
-from backend.core.pdf_extractor import extract_text_from_pdf
+from backend.core.pdf_extractor import extract_text_from_pdf, extract_article_title
 from backend.core.openai_client import (
     start_article_analysis,
     continue_article_analysis,
@@ -27,20 +27,130 @@ async def start_analysis(file: UploadFile = File(...)):
 
     pdf_bytes = await file.read()
     text = extract_text_from_pdf(pdf_bytes)
+    
+    # Extract article title
+    article_title = extract_article_title(pdf_bytes)
 
-    # 1. Store the article text
+    # Check if PDF extraction worked - if text is empty or too short, extraction likely failed
+    if not text or len(text.strip()) < 50:
+        return {
+            "conversation_id": None,
+            "message": (
+                "Unable to extract text from PDF. The file may be corrupted, "
+                "image-based (scanned), or password-protected. Please try a different PDF."
+            ),
+            "next_question": None,
+            "suggestions": {
+                "bruKnow": "https://bruknow.library.brown.edu/discovery/search?query=any,contains,biostatistics&tab=Everything&search_scope=MyInst_and_CI&vid=01BU_INST:BROWN",
+                "pubmed": "https://pubmed.ncbi.nlm.nih.gov/",
+                "nature": "https://www.nature.com/subjects/public-health",
+                "sciencedirect": "https://www.sciencedirect.com"
+            }
+        }
+
+    # --------- STRONG EMPIRICAL ARTICLE VALIDITY CHECK ---------
+    lower = text.lower()
+
+    # Must contain some data-like signals (expanded list for better coverage):
+    empirical_signals = [
+        # Statistical methods
+        "regression", "confidence interval", "p-value", "p value", "p<", "p<=", "p =", "p=",
+        "statistical analysis", "statistical test", "statistical method", "statistics",
+        "anova", "t-test", "t test", "chi-square", "chi square", "fisher", "mann-whitney", "wilcoxon",
+        "logistic", "cox model", "cox regression", "survival analysis", "kaplan-meier",
+        "hazard ratio", "odds ratio", "relative risk", "effect size", "risk ratio",
+        "correlation", "multivariate", "univariate", "bivariate",
+        # Study design and data
+        "sample size", "n=", "n =", "n:", "participants", "subjects", "patients", "individuals",
+        "cohort", "case-control", "cross-sectional", "longitudinal", "prospective", "retrospective",
+        "randomized", "randomised", "clinical trial", "experiment", "experimental",
+        "study design", "research design", "methodology", "methods", "materials and methods",
+        # Data collection and analysis
+        "we analyzed", "we analysed", "data were", "data was", "measured", "measurement",
+        "survey", "questionnaire", "collected data", "data collection", "collected",
+        "outcome", "outcomes", "endpoint", "endpoints", "primary outcome", "secondary outcome",
+        "baseline", "follow-up", "follow up", "intervention", "control group",
+        # Results indicators
+        "results", "findings", "statistically significant", "significance", "significant",
+        "mean", "median", "sd=", "se=", "ci", "95%", "confidence", "standard deviation",
+        # Analysis phrases
+        "analyzed using", "analysed using", "performed using", "using", "analysis",
+        "statistical software", "r software", "spss", "sas", "stata", "python",
+        # Very common research terms (appear in almost all research articles)
+        "hypothesis", "hypotheses", "aim", "objective", "objectives", "purpose",
+        "data", "dataset", "database", "variable", "variables", "model", "models",
+        "study", "studies", "research", "article", "paper", "publication",
+        "analysis", "analyses", "analyze", "analyse", "analyzed", "analysed",
+        "method", "methods", "result", "results", "finding", "findings",
+        "conclusion", "conclusions", "discussion", "introduction", "abstract",
+        "table", "tables", "figure", "figures", "fig", "figs"
+    ]
+
+    has_empirical_signal = any(sig in lower for sig in empirical_signals)
+
+    # Must contain SOME numbers:
+    has_numbers = any(char.isdigit() for char in text)
+
+    # Check if text is substantial (likely a full article)
+    # Use lower thresholds to be more lenient with extraction quality
+    is_substantial = len(text) > 500
+    is_very_substantial = len(text) > 2000  # Very likely a full research article
+
+    # Editorial-like detection
+    editorial_markers = [
+        "editorial", "commentary", "opinion", "perspective",
+    ]
+
+    is_editorial_like = any(m in lower for m in editorial_markers)
+
+    # FINAL RULE: Very lenient - accept if NOT editorial-like AND:
+    # 1. Has empirical signal AND has numbers, OR
+    # 2. Is substantial article (500+ chars) with numbers, OR  
+    # 3. Is very substantial article (2000+ chars) - likely research even if extraction missed signals/numbers
+    # This accounts for cases where PDF extraction might miss some terms but the article is clearly substantial research
+    # The key is: if it's a substantial document, it's likely a research article (not an editorial)
+    
+    # Check if we have enough content to be a research article
+    has_empirical_content = (
+        (has_empirical_signal and has_numbers) or  # Standard case: has signals and numbers
+        (is_substantial and has_numbers) or        # Fallback: substantial with numbers
+        is_very_substantial                         # Very lenient: very substantial = likely research
+    )
+    
+    is_valid_article = has_empirical_content and not is_editorial_like
+
+    if not is_valid_article:
+        return {
+            "conversation_id": None,
+            "message": (
+                "This article does not appear to be an empirical research article with statistical analyses. "
+                "To complete the 10-question peer assessment, you need an article that includes:\n\n"
+                "• Empirical data and statistical methods\n"
+                "• Quantitative results and analysis\n"
+                "• Research methodology and findings\n\n"
+                "Please browse for a different article that aligns with these requirements. "
+                "Click 'Reset Chat' below to upload a new article."
+            ),
+            "next_question": None,
+            "suggestions": {
+                "bruKnow": "https://bruknow.library.brown.edu/discovery/search?query=any,contains,biostatistics&tab=Everything&search_scope=MyInst_and_CI&vid=01BU_INST:BROWN",
+                "pubmed": "https://pubmed.ncbi.nlm.nih.gov/",
+                "nature": "https://www.nature.com/subjects/public-health",
+                "sciencedirect": "https://www.sciencedirect.com"
+            }
+        }
+
+    # If valid, proceed:
     article = supabase.table("articles").insert({
         "pdf_text": text
     }).execute()
     article_id = article.data[0]["id"]
 
-    # 2. Create a new conversation session
     conversation = supabase.table("conversations").insert({
         "article_id": article_id
     }).execute()
     conversation_id = conversation.data[0]["id"]
 
-    # 3. Generate first AI question
     first_question = await start_article_analysis(text)
 
     # 4. Save the AI message
@@ -53,8 +163,17 @@ async def start_analysis(file: UploadFile = File(...)):
     return {
         "conversation_id": conversation_id,
         "message": "PDF processed successfully.",
-        "next_question": first_question
+        "next_question": first_question,
+        "is_valid": True,
+        "article_title": article_title,
+        "suggestions": {
+            "bruKnow": "https://bruknow.library.brown.edu",
+            "pubmed": "https://pubmed.ncbi.nlm.nih.gov",
+            "nature": "https://www.nature.com",
+            "sciencedirect": "https://www.sciencedirect.com"
+        }
     }
+
 
 
 
@@ -155,8 +274,34 @@ async def export_conversation(conversation_id: str):
     """
     Returns the entire conversation (AI + student messages)
     in chronological order so the front end can render/export it.
+    Also includes article_id for linking.
     """
     from backend.core.supabase_client import supabase
+
+    # Load conversation to get article_id
+    conversation = supabase.table("conversations") \
+        .select("article_id") \
+        .eq("id", conversation_id) \
+        .single() \
+        .execute()
+    
+    article_id = conversation.data.get("article_id") if conversation.data else None
+    
+    # Get article title - use first part of text as fallback
+    article_title = "Untitled Article"
+    if article_id:
+        article = supabase.table("articles") \
+            .select("pdf_text") \
+            .eq("id", article_id) \
+            .single() \
+            .execute()
+        if article.data and article.data.get("pdf_text"):
+            text = article.data["pdf_text"]
+            # Use first 150 characters as title (since text is normalized)
+            if len(text) > 20:
+                article_title = text[:150].strip()
+                if len(text) > 150:
+                    article_title += "..."
 
     # Load turns
     history = supabase.table("conversation_turns") \
@@ -178,5 +323,7 @@ async def export_conversation(conversation_id: str):
 
     return {
         "conversation_id": conversation_id,
+        "article_id": article_id,
+        "article_title": article_title,
         "transcript": transcript
     }
