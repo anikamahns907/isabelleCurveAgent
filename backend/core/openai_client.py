@@ -125,7 +125,7 @@ Return ONLY:
 """
 
     response = await client.chat.completions.create(
-        model="gpt-4o",
+        model="4o",
         messages=[
             {"role": "system", "content": ARTICLE_ANALYSIS_SYSTEM_PROMPT},
             {"role": "user", "content": prompt},
