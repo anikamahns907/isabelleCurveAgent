@@ -40,7 +40,7 @@ export default function AnalysisPage() {
     setIsUploading(true);
     try {
       const response = await uploadArticlePDF(file);
-      setConversationId(response.conversation_id);
+      setConversationId(String(response.conversation_id));
       setTurns([
         {
           type: "question",

@@ -81,9 +81,10 @@ export async function sendAnalysisAnswer(
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      conversation_id: conversationId,
+      conversation_id: String(conversationId),
       student_answer: answer,
     }),
+
   });
 
   if (!response.ok) {

@@ -82,7 +82,7 @@ async def continue_analysis(req: ContinueRequest):
         "content": student_answer
     }).execute()
 
-    # 2. Load history
+    # 2. Load history and article text
     history = supabase.table("conversation_turns") \
         .select("*") \
         .eq("conversation_id", conversation_id) \
@@ -90,6 +90,24 @@ async def continue_analysis(req: ContinueRequest):
         .execute()
 
     turns = history.data
+
+    # Fetch the article text tied to this conversation
+    conversation = supabase.table("conversations") \
+        .select("article_id") \
+        .eq("id", conversation_id) \
+        .single() \
+        .execute()
+
+    article_id = conversation.data["article_id"]
+
+    article = supabase.table("articles") \
+        .select("pdf_text") \
+        .eq("id", article_id) \
+        .single() \
+        .execute()
+
+    article_text = article.data["pdf_text"]
+
 
     # 3. Convert to OpenAI roles AND flatten JSON AI messages
     previous_messages = []
@@ -115,8 +133,10 @@ async def continue_analysis(req: ContinueRequest):
     # 4. Generate AI response (reflection, advice, question)
     ai_output = await continue_article_analysis(
         student_answer=student_answer,
-        previous_messages=previous_messages
+        previous_messages=previous_messages,
+        article_text=article_text
     )
+
 
     # 5. Store AI turn in DB as JSON text
     supabase.table("conversation_turns").insert({
