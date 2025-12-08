@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from backend.routers.ask_stream import router as ask_stream_router
 from backend.routers.ask import router as ask_router
 from backend.routers.articleanalysis import router as article_router
+from backend.core.config import settings
 
 app = FastAPI(
     title="Biostats Tutor Backend",
@@ -15,10 +16,7 @@ app = FastAPI(
 # ============================================================
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:3000",
-        "http://127.0.0.1:3000"
-    ],
+    allow_origins=settings.allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
