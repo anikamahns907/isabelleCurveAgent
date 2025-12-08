@@ -1,5 +1,4 @@
-const BASE = "https://isabellecurveagent.onrender.com";
-
+const BASE = process.env.NEXT_PUBLIC_API_URL || "https://isabellecurveagent.onrender.com";
 export interface ChatResponse {
   response: string;
 }
