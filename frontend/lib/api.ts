@@ -1,4 +1,4 @@
-const BASE = "http://127.0.0.1:8000";
+const BASE = "https://isabellecurveagent.onrender.com";
 
 export interface ChatResponse {
   response: string;
