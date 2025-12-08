@@ -4,7 +4,7 @@ import Link from "next/link";
 export default function Navbar() {
   return (
     <nav className="border-b border-gray-200 bg-white/80 backdrop-blur-lg">
-      <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-4xl px-3 sm:px-4 lg:px-6">
         <div className="flex h-16 items-center justify-between">
 
           {/* Logo + Title */}

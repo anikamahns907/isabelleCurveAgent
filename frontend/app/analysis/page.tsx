@@ -288,7 +288,7 @@ const handlePdfUpload = async (file: File) => {
   return (
     <div className="flex h-screen flex-col bg-white">
       <div className="flex-1 overflow-y-auto">
-        <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-4xl px-3 py-8 sm:px-4 lg:px-6">
           {!conversationId ? (
             <div className="space-y-6">
               <div className="text-center">
