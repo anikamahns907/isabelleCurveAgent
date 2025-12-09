@@ -62,12 +62,13 @@ export default function Home() {
 
       {/* Modal */}
       {showModal && (
-        <div 
-          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+        <div
+          className="fixed inset-0 backdrop-blur-sm bg-gray-100/80 flex items-center justify-center z-50 p-4"
           onClick={() => setShowModal(false)}
         >
+
           <div 
-            className="bg-white rounded-lg max-w-3xl w-full max-h-[90vh] overflow-y-auto"
+            className="bg-white shadow-2xl rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto border border-gray-100"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="p-6">
@@ -82,71 +83,74 @@ export default function Home() {
               </div>
 
               <div className="space-y-6 text-gray-700">
+
+                {/* How to Use */}
                 <div>
-                  <h3 className="text-xl font-semibold text-gray-900 mb-2">How to Use It</h3>
-                  <ul className="list-disc list-inside space-y-2 ml-2">
-                    <li>
-                      <strong>Chat:</strong> Ask questions about biostatistics concepts, probability, regression, ANOVA, 
-                      and more. Isabelle has access to your course materials and can provide personalized explanations.
-                    </li>
-                    <li>
-                      <strong>Article Analysis:</strong> Upload an empirical research article to work through a structured 
-                      10-question peer assessment. Isabelle will guide you through understanding the study design, 
-                      statistical methods, results interpretation, and more.
-                    </li>
-                  </ul>
+                  <h3 className="text-xl font-semibold text-gray-900 mb-2">Before You Begin</h3>
+                  <p className="text-sm leading-relaxed">
+                    The Article Analysis feature will guide you through a structured sequence of 
+                    <strong> 10 in-depth questions</strong> about the article you upload. Your responses should be 
+                    <strong> multiple full sentences</strong> because they will appear in your exported PDF for 
+                    Professor Lipman as part of your assessment.
+                  </p>
                 </div>
 
+                {/* Requirements */}
                 <div className="bg-blue-50 border-l-4 border-[var(--isabelle-primary)] p-4 rounded">
-                  <h3 className="font-semibold text-gray-900 mb-2">Article Analysis Requirements</h3>
+                  <h3 className="font-semibold text-gray-900 mb-2">Article Requirements</h3>
                   <p className="mb-3">
-                    For the Article Analysis feature, you need an <strong>empirical research article</strong> that includes:
+                    You must upload an <strong>empirical biostatistics research article</strong> that includes:
                   </p>
-                  <ul className="list-disc list-inside space-y-1 ml-2 mb-3">
-                    <li>Statistical methods and data analysis</li>
-                    <li>Quantitative results and findings</li>
-                    <li>Research methodology and study design</li>
+
+                  <ul className="list-disc list-inside space-y-1 ml-2 mb-3 text-sm">
+                    <li>A clear <strong>Methods</strong> section</li>
+                    <li>Statistical models or tests (e.g., regression, ANOVA, confidence intervals)</li>
+                    <li><strong>Quantitative results</strong> and a Results section</li>
+                    <li>An identifiable study design (RCT, cohort study, cross-sectional, etc.)</li>
                   </ul>
-                  <p className="mb-2 text-sm">
-                    <strong>Note:</strong> Editorials, commentaries, opinion pieces, and non-research articles will not work.
+
+                  <p className="text-sm text-gray-700 mb-3">
+                    Editorials, news articles, commentaries, summaries, or conceptual papers will be rejected.
                   </p>
-                  <p className="text-sm font-medium text-gray-900 mb-2">Find suitable articles at:</p>
+
+                  <h4 className="font-semibold text-gray-900 mb-2">Acceptable Example Articles</h4>
+                  <ul className="list-disc list-inside space-y-1 ml-2 text-sm">
+                    <li><em>Effect of High-Dose Vitamin D Supplementation on Bone Density in Adults: A Randomized Controlled Trial</em></li>
+                    <li><em>Associations Between Air Pollution Exposure and Asthma Severity: A Cohort Study</em></li>
+                    <li><em>Predictors of COVID-19 Mortality Using Logistic Regression in a Hospital System</em></li>
+                    <li><em>Impact of Exercise on Blood Pressure: A Meta-Analysis of Controlled Trials</em></li>
+                  </ul>
+
+                  <p className="mt-3 text-sm font-medium text-gray-900">
+                    Find suitable articles at:
+                  </p>
                   <ul className="space-y-1 text-sm">
                     <li>
                       • <a 
-                        href="https://bruknow.library.brown.edu/discovery/search?query=any,contains,biostatistics&tab=Everything&search_scope=MyInst_and_CI&vid=01BU_INST:BROWN"
-                        target="_blank"
-                        className="text-[var(--isabelle-primary)] hover:text-blue-700 underline"
-                      >
-                        Brown BruKnow Library
-                      </a> - Search for biostatistics research articles
+                          href="https://bruknow.library.brown.edu/discovery/search?query=any,contains,biostatistics&tab=Everything&search_scope=MyInst_and_CI&vid=01BU_INST:BROWN"
+                          target="_blank"
+                          className="text-[var(--isabelle-primary)] hover:text-blue-700 underline"
+                        >
+                          Brown BruKnow Library (recommended)
+                        </a>
                     </li>
                     <li>
-                      • <a 
-                        href="https://pubmed.ncbi.nlm.nih.gov/"
-                        target="_blank"
-                        className="text-[var(--isabelle-primary)] hover:text-blue-700 underline"
-                      >
+                      • <a href="https://pubmed.ncbi.nlm.nih.gov/" target="_blank"
+                        className="text-[var(--isabelle-primary)] hover:text-blue-700 underline">
                         PubMed
-                      </a> - Biomedical and biostatistical research database
+                      </a>
                     </li>
                     <li>
-                      • <a 
-                        href="https://www.nature.com/subjects/public-health"
-                        target="_blank"
-                        className="text-[var(--isabelle-primary)] hover:text-blue-700 underline"
-                      >
-                        Nature Public Health
-                      </a> - Peer-reviewed research articles
+                      • <a href="https://www.nature.com/subjects/biostatistics" target="_blank"
+                        className="text-[var(--isabelle-primary)] hover:text-blue-700 underline">
+                        Nature — Biostatistics
+                      </a>
                     </li>
                     <li>
-                      • <a 
-                        href="https://www.sciencedirect.com"
-                        target="_blank"
-                        className="text-[var(--isabelle-primary)] hover:text-blue-700 underline"
-                      >
+                      • <a href="https://www.sciencedirect.com" target="_blank"
+                        className="text-[var(--isabelle-primary)] hover:text-blue-700 underline">
                         ScienceDirect
-                      </a> - Scientific publications in biostatistics and epidemiology
+                      </a>
                     </li>
                   </ul>
                 </div>
@@ -166,7 +170,9 @@ export default function Home() {
                     Continue to Analysis
                   </Link>
                 </div>
+
               </div>
+
             </div>
           </div>
         </div>
