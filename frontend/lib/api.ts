@@ -1,4 +1,9 @@
 const BASE = process.env.NEXT_PUBLIC_API_URL || "https://isabellecurveagent.onrender.com";
+
+// Debug: Log the API URL in development (removed in production builds)
+if (typeof window !== "undefined" && process.env.NODE_ENV === "development") {
+  console.log("API Base URL:", BASE);
+}
 export interface ChatResponse {
   response: string;
 }
@@ -63,19 +68,50 @@ export async function uploadArticlePDF(
   const formData = new FormData();
   formData.append("file", file);
 
-  const response = await fetch(`${BASE}/articleanalysis/start`, {
-    method: "POST",
-    body: formData,
-  });
+  try {
+    // Create an AbortController for timeout handling
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 120000); // 2 minute timeout
 
-  if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(
-      `PDF upload failed: ${response.statusText} - ${errorText}`
-    );
+    const response = await fetch(`${BASE}/articleanalysis/start`, {
+      method: "POST",
+      body: formData,
+      signal: controller.signal,
+    });
+
+    clearTimeout(timeoutId);
+
+    if (!response.ok) {
+      let errorText = "";
+      try {
+        errorText = await response.text();
+      } catch (e) {
+        errorText = "Unable to read error message";
+      }
+      throw new Error(
+        `PDF upload failed: ${response.statusText} - ${errorText}`
+      );
+    }
+
+    return await response.json();
+  } catch (error) {
+    // Handle network errors, CORS errors, and timeouts
+    if (error instanceof Error) {
+      if (error.name === "AbortError") {
+        throw new Error("PDF upload timed out. The file may be too large or the server is taking too long to respond.");
+      }
+      if (error.message.includes("Failed to fetch") || error.message.includes("NetworkError")) {
+        throw new Error(
+          `Failed to connect to server. Please check:\n` +
+          `1. The backend server is running at ${BASE}\n` +
+          `2. Your internet connection is working\n` +
+          `3. There are no CORS or firewall issues`
+        );
+      }
+      throw error;
+    }
+    throw new Error("Unknown error occurred during PDF upload");
   }
-
-  return await response.json();
 }
 
 /**

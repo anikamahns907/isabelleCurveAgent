@@ -20,15 +20,19 @@ class Settings:
             "http://127.0.0.1:3000",
         ]
         
-        # Add production frontend URL if provided
+        # Add production frontend URL if provided (strip trailing slash for consistency)
         if self.FRONTEND_URL:
-            origins.append(self.FRONTEND_URL)
+            frontend_url = self.FRONTEND_URL.rstrip("/")
+            origins.append(frontend_url)
+            # Also add with trailing slash in case it's needed
+            if frontend_url != self.FRONTEND_URL:
+                origins.append(self.FRONTEND_URL)
         
         # Add additional production URLs from comma-separated env var
         # Example: ALLOWED_ORIGINS=https://myapp.vercel.app,https://myapp.com
         additional_origins = os.getenv("ALLOWED_ORIGINS", "")
         if additional_origins:
-            origins.extend([origin.strip() for origin in additional_origins.split(",") if origin.strip()])
+            origins.extend([origin.strip().rstrip("/") for origin in additional_origins.split(",") if origin.strip()])
         
         # Remove duplicates while preserving order
         seen = set()
@@ -39,6 +43,12 @@ class Settings:
                 unique_origins.append(origin)
         
         return unique_origins
+    
+    @property
+    def allowed_origin_regex(self) -> str | None:
+        """Regex pattern to allow Vercel preview URLs dynamically"""
+        # Allow all Vercel preview deployments (*.vercel.app)
+        return r"https://.*\.vercel\.app"
 
 
 settings = Settings()
