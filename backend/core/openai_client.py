@@ -245,6 +245,24 @@ Return ONLY:
     return response.choices[0].message.content
 
 
+async def generate_summary(previous_messages: list) -> str:
+    """
+    Very short reflective summary of what the student did well and
+    what they could improve. No grading.
+    """
+    prompt = """
+Write a short, 4–6 sentence summary describing:
+- What the student did well in their analysis,
+- What they could improve on,
+- No grading, no scores,
+- Keep academic but supportive.
+"""
+    response = await client.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=previous_messages + [{"role": "user", "content": prompt}],
+        max_tokens=200
+    )
+    return response.choices[0].message.content
 
 # ============================================================
 # CONTINUE ARTICLE ANALYSIS (Now RAG + memory)
@@ -304,8 +322,16 @@ async def continue_article_analysis(student_answer: str, previous_messages: list
             "followup_question": ""
         }
 
+    # ---------- ADD THIS SMALL BLOCK ----------
+    summary = None
+    if data.get("followup_question") in [None, "null", ""]:
+        # This means the 10-question cycle is complete
+        summary = await generate_summary(previous_messages)
+    # ------------------------------------------
+
     return {
         "reflection": data.get("reflection", ""),
         "clarification": data.get("clarification", ""),
-        "followup_question": data.get("followup_question", "")
+        "followup_question": data.get("followup_question", ""),
+        "summary": summary   # <-- new field ONLY at the end
     }
