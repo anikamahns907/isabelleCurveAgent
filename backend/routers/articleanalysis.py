@@ -40,6 +40,7 @@ async def start_analysis(file: UploadFile = File(...)):
                 "image-based (scanned), or password-protected. Please try a different PDF."
             ),
             "next_question": None,
+            "is_valid": False,
             "suggestions": {
                 "bruKnow": "https://bruknow.library.brown.edu/discovery/search?query=any,contains,biostatistics&tab=Everything&search_scope=MyInst_and_CI&vid=01BU_INST:BROWN",
                 "pubmed": "https://pubmed.ncbi.nlm.nih.gov/",
@@ -102,22 +103,52 @@ async def start_analysis(file: UploadFile = File(...)):
     ]
 
     is_editorial_like = any(m in lower for m in editorial_markers)
+    # ============================================================
+    # FINAL VALIDATION RULE (extremely lenient)
+    # ============================================================
 
-    # FINAL RULE: Very lenient - accept if NOT editorial-like AND:
-    # 1. Has empirical signal AND has numbers, OR
-    # 2. Is substantial article (500+ chars) with numbers, OR  
-    # 3. Is very substantial article (2000+ chars) - likely research even if extraction missed signals/numbers
-    # This accounts for cases where PDF extraction might miss some terms but the article is clearly substantial research
-    # The key is: if it's a substantial document, it's likely a research article (not an editorial)
-    
-    # Check if we have enough content to be a research article
-    has_empirical_content = (
-        (has_empirical_signal and has_numbers) or  # Standard case: has signals and numbers
-        (is_substantial and has_numbers) or        # Fallback: substantial with numbers
-        is_very_substantial                         # Very lenient: very substantial = likely research
-    )
-    
-    is_valid_article = has_empirical_content and not is_editorial_like
+    # Extractable text required
+    if not text or len(text.strip()) < 300:
+        return {
+            "conversation_id": None,
+            "message": (
+                "I couldn't extract enough text from this PDF to analyze it. "
+                "Please upload a scientific research article with readable text."
+            ),
+            "next_question": None,
+            "is_valid": False,
+            "suggestions": {
+                "bruKnow": "https://bruknow.library.brown.edu",
+                "pubmed": "https://pubmed.ncbi.nlm.nih.gov",
+                "nature": "https://www.nature.com",
+                "sciencedirect": "https://www.sciencedirect.com"
+            }
+        }
+
+    # Hard rejection ONLY for clear opinion pieces / news / commentary
+    lower = text.lower()
+    editorial_markers = ["opinion", "editorial", "commentary", "news article", "press release"]
+
+    if any(marker in lower[:1500] for marker in editorial_markers):
+        return {
+            "conversation_id": None,
+            "message": (
+                "This appears to be a news or opinion article, not an empirical study. "
+                "Please upload a research paper with methods and results."
+            ),
+            "next_question": None,
+            "is_valid": False,
+            "suggestions": {
+                "bruKnow": "https://bruknow.library.brown.edu",
+                "pubmed": "https://pubmed.ncbi.nlm.nih.gov",
+                "nature": "https://www.nature.com",
+                "sciencedirect": "https://www.sciencedirect.com"
+            }
+        }
+
+    # Otherwise ACCEPT EVERYTHING
+    is_valid_article = True
+
 
     if not is_valid_article:
         return {
@@ -132,6 +163,7 @@ async def start_analysis(file: UploadFile = File(...)):
                 "Click 'Reset Chat' below to upload a new article."
             ),
             "next_question": None,
+            "is_valid": False,
             "suggestions": {
                 "bruKnow": "https://bruknow.library.brown.edu/discovery/search?query=any,contains,biostatistics&tab=Everything&search_scope=MyInst_and_CI&vid=01BU_INST:BROWN",
                 "pubmed": "https://pubmed.ncbi.nlm.nih.gov/",

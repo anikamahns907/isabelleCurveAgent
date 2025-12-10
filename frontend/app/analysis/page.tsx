@@ -45,9 +45,25 @@ export default function AnalysisPage() {
 
     try {
       const response = await uploadArticlePDF(file);
+      
+      // DEBUG: Log backend response
+      console.log("📥 Backend Response (PDF Upload):", JSON.stringify(response, null, 2));
+      
+      // Infer is_valid if missing (fallback: if conversation_id exists, article is valid)
+      const is_valid = response.is_valid !== undefined 
+        ? response.is_valid 
+        : !!response.conversation_id;
+      
+      console.log("📊 Response Evaluation:", {
+        "is_valid (from backend)": response.is_valid,
+        "is_valid (inferred)": is_valid,
+        "has_conversation_id": !!response.conversation_id,
+        "will_show_invalid": !is_valid || !response.conversation_id,
+        "decision": (!is_valid || !response.conversation_id) ? "INVALID → Show error message" : "VALID → Start conversation"
+      });
 
       // INVALID ARTICLE CASE
-      if (!response.is_valid || !response.conversation_id) {
+      if (!is_valid || !response.conversation_id) {
         setConversationId(null);
 
         setTurns([
@@ -115,12 +131,24 @@ export default function AnalysisPage() {
 
     try {
       const response = await sendAnalysisAnswer(conversationId, answer);
+      
+      // DEBUG: Log backend response
+      console.log("📥 Backend Response (Answer):", JSON.stringify(response, null, 2));
+      console.log("📊 Response Evaluation:", {
+        has_reflection: !!response.reflection,
+        has_clarification: !!response.clarification,
+        followup_question: response.followup_question,
+        is_complete: response.followup_question === null
+      });
+      
       const aiTurn: AnalysisTurn = {
         type: "response",
         reflection: response.reflection,
         clarification: response.clarification,
         followupQuestion: response.followup_question,
       };
+      
+      console.log("🎨 Frontend Turn Object:", JSON.stringify(aiTurn, null, 2));
 
       setTurns((prev) => [...prev, aiTurn]);
 

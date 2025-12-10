@@ -93,7 +93,20 @@ export async function uploadArticlePDF(
       );
     }
 
-    return await response.json();
+    const jsonResponse = await response.json();
+    
+    // DEBUG: Log raw API response and response metadata
+    console.log("🌐 API Response (uploadArticlePDF):", JSON.stringify(jsonResponse, null, 2));
+    console.log("🔍 Response Fields Check:", {
+      "Status": response.status,
+      "Has conversation_id": "conversation_id" in jsonResponse,
+      "Has is_valid": "is_valid" in jsonResponse,
+      "Has message": "message" in jsonResponse,
+      "Has next_question": "next_question" in jsonResponse,
+      "All keys": Object.keys(jsonResponse)
+    });
+    
+    return jsonResponse;
   } catch (error) {
     // Handle network errors, CORS errors, and timeouts
     if (error instanceof Error) {
@@ -137,7 +150,19 @@ export async function sendAnalysisAnswer(
     throw new Error(`Analysis answer failed: ${response.statusText}`);
   }
 
-  return await response.json();
+  const jsonResponse = await response.json();
+  
+  // DEBUG: Log raw API response and response metadata
+  console.log("🌐 API Response (sendAnalysisAnswer):", JSON.stringify(jsonResponse, null, 2));
+  console.log("🔍 Response Fields Check:", {
+    "Status": response.status,
+    "Has reflection": "reflection" in jsonResponse,
+    "Has clarification": "clarification" in jsonResponse,
+    "Has followup_question": "followup_question" in jsonResponse,
+    "All keys": Object.keys(jsonResponse)
+  });
+  
+  return jsonResponse;
 }
 
 /**
