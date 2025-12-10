@@ -97,14 +97,8 @@ async def start_analysis(file: UploadFile = File(...)):
     is_substantial = len(text) > 500
     is_very_substantial = len(text) > 2000  # Very likely a full research article
 
-    # Editorial-like detection
-    editorial_markers = [
-        "editorial", "commentary", "opinion", "perspective",
-    ]
-
-    is_editorial_like = any(m in lower for m in editorial_markers)
     # ============================================================
-    # FINAL VALIDATION RULE (extremely lenient)
+    # FINAL VALIDATION RULE (lenient - only reject obvious issues)
     # ============================================================
 
     # Extractable text required
@@ -125,28 +119,9 @@ async def start_analysis(file: UploadFile = File(...)):
             }
         }
 
-    # Hard rejection ONLY for clear opinion pieces / news / commentary
-    lower = text.lower()
-    editorial_markers = ["opinion", "editorial", "commentary", "news article", "press release"]
-
-    if any(marker in lower[:1500] for marker in editorial_markers):
-        return {
-            "conversation_id": None,
-            "message": (
-                "This appears to be a news or opinion article, not an empirical study. "
-                "Please upload a research paper with methods and results."
-            ),
-            "next_question": None,
-            "is_valid": False,
-            "suggestions": {
-                "bruKnow": "https://bruknow.library.brown.edu",
-                "pubmed": "https://pubmed.ncbi.nlm.nih.gov",
-                "nature": "https://www.nature.com",
-                "sciencedirect": "https://www.sciencedirect.com"
-            }
-        }
-
-    # Otherwise ACCEPT EVERYTHING
+    # Accept articles with sufficient text - let the user and AI determine if it's appropriate
+    # We don't reject based on keywords since valid research articles may contain
+    # words like "opinion", "editorial", "commentary" in various contexts
     is_valid_article = True
 
 

@@ -1,7 +1,13 @@
+"use client";
+
+import AnimatedBackground from "@/components/AnimatedBackground";
+
 export default function ResourcesPage() {
   return (
-    <div className="flex h-screen flex-col bg-white">
-      <div className="flex-1 overflow-y-auto">
+    <div className="relative flex min-h-[calc(100vh-4rem)] flex-col bg-[var(--isabelle-bg)] overflow-hidden">
+      <AnimatedBackground />
+      
+      <div className="relative z-10 flex-1 overflow-y-auto">
         <div className="mx-auto max-w-4xl px-3 py-8 sm:px-4 lg:px-6">
           <div className="text-center mb-8">
             <h1 className="mb-2 text-2xl font-semibold text-gray-900">
@@ -16,7 +22,7 @@ export default function ResourcesPage() {
             {/* Course Resources */}
             <section>
               <h2 className="text-lg font-semibold text-gray-900 mb-4">Course Resources</h2>
-              <div className="bg-[var(--isabelle-bg)] rounded-lg border border-gray-200 p-6">
+              <div className="bg-white/90 backdrop-blur-sm rounded-lg border border-gray-200 p-6 shadow-sm">
                 <ul className="space-y-3">
                   <li>
                     <a
@@ -44,7 +50,7 @@ export default function ResourcesPage() {
             {/* Article Databases */}
             <section>
               <h2 className="text-lg font-semibold text-gray-900 mb-4">Article Databases</h2>
-              <div className="bg-[var(--isabelle-bg)] rounded-lg border border-gray-200 p-6">
+              <div className="bg-white/90 backdrop-blur-sm rounded-lg border border-gray-200 p-6 shadow-sm">
                 <p className="text-sm text-gray-700 mb-4">
                   Find empirical research articles for your analysis:
                 </p>
