@@ -1,6 +1,6 @@
 # Isabelle Curve
 
-**An AI-powered biostatistics tutoring agent for PHP 2510 at Brown University**
+**An AI-powered biostatistics tutoring agent for PHP 2510**
 
 Isabelle Curve helps students master biostatistics concepts through:
 - **Biostats Chat** — RAG-powered Q&A using course materials
